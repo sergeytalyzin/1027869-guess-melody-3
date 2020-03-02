@@ -29,7 +29,7 @@ class GenreQuestionScreen extends PureComponent {
         >
           {answers.map((answer, i) => (
             <div key={`${i}-${answer.src}`} className="track">
-              {renderPlayer(answers.src, i)}
+              {renderPlayer(answer.src, i)}
               <div className="game__answer">
                 <input className="game__input visually-hidden" type="checkbox" name="answer" value={`answer-${i}`}
                   id={`answer-${i}`}
