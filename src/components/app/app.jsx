@@ -3,9 +3,13 @@ import PropTypes from "prop-types";
 import {Switch, Route, BrowserRouter} from "react-router-dom";
 import WelcomeScreen from "../welcome-screen/welcome-screen.jsx";
 import ArtistQuestionScreen from "../artist-question-screen/artist-question-screen.jsx";
-import GenreQuestionScreen from "../genre-question-screen/genre-question-screen";
+import GenreQuestionScreen from "../genre-question-screen/genre-question-screen.jsx";
 import {GameType} from "../../const.js";
-import GameScreen from "../game-screen/game-screen";
+import GameScreen from "../game-screen/game-screen.jsx";
+import withActivePlayer from "../../hocs/with-audio-player/with-audio-player.js";
+
+const GenreQuestionScreenWrapper = withActivePlayer(GenreQuestionScreen);
+const ArtistQuestionScreenWrapper = withActivePlayer(ArtistQuestionScreen);
 
 class App extends PureComponent {
   constructor(props) {
@@ -38,7 +42,7 @@ class App extends PureComponent {
         case GameType.ARTIST:
           return (
             <GameScreen type={question.type}>
-              <ArtistQuestionScreen
+              <ArtistQuestionScreenWrapper
                 question={question}
                 onAnswer={() => {
                   this.setState((prevState) => ({
@@ -52,7 +56,7 @@ class App extends PureComponent {
         case GameType.GENRE:
           return (
             <GameScreen type={question.type}>
-              <GenreQuestionScreen
+              <GenreQuestionScreenWrapper
                 question={question}
                 onAnswer={() => {
                   this.setState((prevState) => ({
@@ -78,13 +82,13 @@ class App extends PureComponent {
             {this._renderGameScreen()}
           </Route>
           <Route exact path="/artist">
-            <ArtistQuestionScreen
+            <ArtistQuestionScreenWrapper
               question={questions[1]}
               onAnswer={() => {}}
             />
           </Route>
           <Route exact path="/genre">
-            <GenreQuestionScreen
+            <GenreQuestionScreenWrapper
               question={questions[0]}
               onAnswer={() => {}}
             />
@@ -93,8 +97,6 @@ class App extends PureComponent {
       </BrowserRouter>
     );
   }
-
-
 }
 
 App.propTypes = {

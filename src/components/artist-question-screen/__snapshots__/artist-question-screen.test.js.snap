@@ -14,19 +14,7 @@ exports[`ArtistQuestionScreen is rendered correctly 1`] = `
   >
     <div
       className="track"
-    >
-      <button
-        className="track__button track__button--play"
-        type="button"
-      />
-      <div
-        className="track__status"
-      >
-        <audio>
-          https://upload.wikimedia.org/wikipedia/commons/4/4e/BWV_543-fugue.ogg
-        </audio>
-      </div>
-    </div>
+    />
   </div>
   <form
     className="game__artist"
