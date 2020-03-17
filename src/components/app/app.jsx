@@ -86,7 +86,6 @@ App.propTypes = {
   onUserAnswer: PropTypes.func.isRequired,
   onWelcomeButtonClick: PropTypes.func.isRequired,
   step: PropTypes.number.isRequired,
-  errorsCount: PropTypes.number.isRequired,
   questions: PropTypes.arrayOf(PropTypes.shape({
     type: PropTypes.oneOf([GameType.ARTIST, GameType.GENRE]).isRequired,
     genre: PropTypes.string.isRequired,
