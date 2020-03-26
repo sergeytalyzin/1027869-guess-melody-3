@@ -5,20 +5,23 @@ import {connect} from "react-redux";
 import {ActionCreator} from "../../reducer.js";
 import WelcomeScreen from "../welcome-screen/welcome-screen.jsx";
 import ArtistQuestionScreen from "../artist-question-screen/artist-question-screen.jsx";
-import GenreQuestionScreen from "../genre-question-screen/genre-question-screen.jsx";
-import {GameType} from "../../const.js";
 import GameScreen from "../game-screen/game-screen.jsx";
+import GenreQuestionScreen from "../genre-question-screen/genre-question-screen.jsx";
+import GameOverScreen from "../game-over-screen/game-over-screen.jsx";
+import WinScreen from "../win-screen/win-screen.jsx";
+import {GameType} from "../../const.js";
 import withActivePlayer from "../../hocs/with-audio-player/with-audio-player.js";
+import withUserAnswer from "../../hocs/with-user-answer/with-user-answer.js";
 
-const GenreQuestionScreenWrapper = withActivePlayer(GenreQuestionScreen);
-const ArtistQuestionScreenWrapper = withActivePlayer(ArtistQuestionScreen);
+const GenreQuestionScreenWrapped = withActivePlayer(withUserAnswer(GenreQuestionScreen));
+const ArtistQuestionScreenWrapped = withActivePlayer(ArtistQuestionScreen);
 
 class App extends PureComponent {
   _renderGameScreen() {
-    const {maxMistakes, questions, onUserAnswer, onWelcomeButtonClick, step} = this.props;
+    const {maxMistakes, mistakes, questions, onUserAnswer, onWelcomeButtonClick, resetGame, step} = this.props;
     const question = questions[step];
 
-    if (step === -1 || step >= questions.length) {
+    if (step === -1) {
       return (
         <WelcomeScreen
           errorsCount={maxMistakes}
@@ -27,22 +30,43 @@ class App extends PureComponent {
       );
     }
 
+    if (mistakes >= maxMistakes) {
+      return (
+        <GameOverScreen
+          onReplayButtonClick={resetGame}
+        />
+      );
+    }
+
+    if (step >= questions.length) {
+      return (
+        <WinScreen
+          questionsCount={questions.length}
+          mistakesCount={mistakes}
+          onReplayButtonClick={resetGame}
+        />
+      );
+    }
+
     if (question) {
       switch (question.type) {
         case GameType.ARTIST:
           return (
-            <GameScreen type={question.type}>
-              <ArtistQuestionScreenWrapper
+            <GameScreen
+              type={question.type}
+            >
+              <ArtistQuestionScreenWrapped
                 question={question}
                 onAnswer={onUserAnswer}
               />
             </GameScreen>
-
           );
         case GameType.GENRE:
           return (
-            <GameScreen type={question.type}>
-              <GenreQuestionScreenWrapper
+            <GameScreen
+              type={question.type}
+            >
+              <GenreQuestionScreenWrapped
                 question={question}
                 onAnswer={onUserAnswer}
               />
@@ -64,13 +88,13 @@ class App extends PureComponent {
             {this._renderGameScreen()}
           </Route>
           <Route exact path="/artist">
-            <ArtistQuestionScreenWrapper
+            <ArtistQuestionScreenWrapped
               question={questions[1]}
               onAnswer={() => {}}
             />
           </Route>
           <Route exact path="/genre">
-            <GenreQuestionScreenWrapper
+            <GenreQuestionScreenWrapped
               question={questions[0]}
               onAnswer={() => {}}
             />
@@ -83,34 +107,19 @@ class App extends PureComponent {
 
 App.propTypes = {
   maxMistakes: PropTypes.number.isRequired,
+  mistakes: PropTypes.number.isRequired,
+  questions: PropTypes.array.isRequired,
   onUserAnswer: PropTypes.func.isRequired,
   onWelcomeButtonClick: PropTypes.func.isRequired,
+  resetGame: PropTypes.func.isRequired,
   step: PropTypes.number.isRequired,
-  questions: PropTypes.arrayOf(PropTypes.shape({
-    type: PropTypes.oneOf([GameType.ARTIST, GameType.GENRE]).isRequired,
-    genre: PropTypes.string.isRequired,
-    answers: PropTypes.arrayOf(PropTypes.shape({
-      src: PropTypes.string.isRequired,
-      genre: PropTypes.string.isRequired,
-    })).isRequired,
-  },
-  {
-    type: PropTypes.oneOf([GameType.ARTIST, GameType.GENRE]).isRequired,
-    song: PropTypes.shape({
-      artist: PropTypes.string.isRequired,
-      src: PropTypes.string.isRequired,
-    }).isRequired,
-    answers: PropTypes.arrayOf(PropTypes.shape({
-      artist: PropTypes.string.isRequired,
-      picture: PropTypes.string.isRequired,
-    })).isRequired,
-  })).isRequired,
 };
 
 const mapStateToProps = (state) => ({
   step: state.step,
   maxMistakes: state.maxMistakes,
   questions: state.questions,
+  mistakes: state.mistakes,
 });
 
 const mapDispatchToProps = (dispatch) => ({
@@ -120,6 +129,9 @@ const mapDispatchToProps = (dispatch) => ({
   onUserAnswer(question, answer) {
     dispatch(ActionCreator.incrementMistake(question, answer));
     dispatch(ActionCreator.incrementStep());
+  },
+  resetGame() {
+    dispatch(ActionCreator.resetGame());
   },
 });
 
